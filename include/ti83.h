@@ -1,32 +1,48 @@
+__at 0x844B volatile unsigned char cur_row;
+__at 0x844C volatile unsigned char cur_col;
 
-void _PutC(char c) {
+inline void
+clear_lcd_full() {
+  __asm
+    rst 0x28
+    .dw 0x4540
+  __endasm;
+}
+
+void
+puts(char *s) {
+  __asm
+    ld l, 4(ix)
+    ld h, 5(ix)
+    rst #0x28
+    .dw #0x450A
+  __endasm;
+}
+
+void
+putc(char c) {
    __asm
-      pop bc
-      pop de
-      pop hl
-      ld a, l
-      push hl
-      push de
-      push bc
-      rst 0x28
-      .dw 0x4504
+     ld a, 4(ix)
+     rst 0x28
+     .dw 0x4504
    __endasm;
    (void)c;
 }
 
-void _NewLine() {
+inline void
+new_line() {
    __asm
-      rst 0x28
-      .dw 0x452E
+     rst 0x28
+     .dw 0x452E
    __endasm;
 }
 
-void print(char* str) {
-   int i;
-   for (i = 0; str[i] != 0; i++) {
-      if (str[i] != '\n')
-         _PutC(str[i]);
-      else
-         _NewLine();
-   }
+char
+get_key() {
+  __asm
+    rst 0x28
+    .dw 0x4972
+    ld h, #0x0
+    ld l, a
+  __endasm;
 }
